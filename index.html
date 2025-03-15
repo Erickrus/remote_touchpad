@@ -1,0 +1,95 @@
+<html>
+<head>
+    <style>
+        /* Reset default margins and ensure full viewport height */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        /* Center the movement-div both horizontally and vertically */
+        #movement-div {
+            display: flex; /* Use flexbox for centering */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            height: 100vh; /* Full viewport height */
+            width: 100vw; /* Full viewport width */
+            text-align: center; /* Center text within the div */
+            background-color: #f0f0f0; /* Optional: Add background color for visibility */
+        }
+
+        /* Style the H1 and P elements */
+        #movement-div h1 {
+            font-size: 8rem; /* Adjust font size for mobile (responsive) */
+            color: #333; /* Optional: Text color */
+            margin: 0; /* Remove default margin */
+        }
+
+        #movement-div p {
+            margin: 0; /* Remove default margin for the <p> tag */
+        }
+
+        /* Responsive font size for smaller screens */
+        @media (max-width: 768px) {
+            #movement-div h1 {
+                font-size: 2rem; /* Smaller font size for mobile */
+            }
+        }
+    </style>
+</head>
+<body style="background-color: burlywood;">
+<div id="movement-div"><H1>Remote<p></p>TouchPad</H1></div>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+const movementDiv = document.getElementById('movement-div');
+//const socket = io('http://10.0.241.122:5000');
+const socketUrl = `http://${window.location.hostname}:5000`;
+console.log(socketUrl);
+const socket = io(socketUrl);
+let touchStartTime = null;
+const tapThreshold = 300; // Milliseconds for tap detection
+
+movementDiv.addEventListener('touchstart', (event) => {
+    event.preventDefault();
+    touchStartTime = Date.now();
+    const touch = event.touches[0];
+    const x = touch.pageX;
+    const y = touch.pageY;
+    const W_div = movementDiv.clientWidth;
+    const H_div = movementDiv.clientHeight;
+    socket.emit('message', { type: 'touchstart', x: x, y: y, W_div: W_div, H_div: H_div });
+});
+
+movementDiv.addEventListener('touchmove', (event) => {
+    event.preventDefault();
+    const touch = event.touches[0];
+    const x = touch.pageX;
+    const y = touch.pageY;
+    socket.emit('message', { type: 'touchmove', x: x, y: y });
+});
+
+movementDiv.addEventListener('touchend', (event) => {
+    event.preventDefault();
+    const touchDuration = Date.now() - touchStartTime;
+    if (touchDuration < tapThreshold && event.changedTouches.length > 0) {
+        // Quick tap detected
+        const fingers = event.changedTouches.length;
+        socket.emit('message', { type: 'click', fingers: fingers });
+    }
+    socket.emit('message', { type: 'touchend' });
+});
+</script>
+<style>
+#movement-div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+}
+</style>
+</body>
+</html>
