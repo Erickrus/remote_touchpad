@@ -4,7 +4,7 @@ import threading
 import pyautogui
 pyautogui.FAILSAFE = False
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins='*')
+socketio = SocketIO(app, cors_allowed_origins='*', ping_timeout=10, ping_interval=5)
 
 W_mac, H_mac = pyautogui.size()
 last_touch_x = None
@@ -35,8 +35,8 @@ def handle_message(data):
             # Scale deltas based on screen and touchpad resolution
             scale_x = W_mac / W_div if W_div else 1
             scale_y = H_mac / H_div if H_div else 1
-            delta_mouse_x = int(delta_touch_x * 0.37)
-            delta_mouse_y = int(delta_touch_y * 0.37)
+            delta_mouse_x = int(delta_touch_x * 0.5)
+            delta_mouse_y = int(delta_touch_y * 0.5)
             # delta_mouse_x = delta_touch_x #* scale_x
             # delta_mouse_y = delta_touch_y #* scale_y
             # Move mouse relatively
@@ -69,6 +69,11 @@ def handle_message(data):
         pyautogui.click()
     elif data['type'] == 'rightclick':
         pyautogui.rightClick()
+    elif data['type'] == 'scrollup':
+        pyautogui.scroll(-5)
+    elif data['type'] == 'scrolldown':
+        pyautogui.scroll(5)
+
 
 @app.route('/')
 def serve_control_page():

@@ -1,95 +1,256 @@
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        /* Reset default margins and ensure full viewport height */
         html, body {
             margin: 0;
             padding: 0;
-            height: 100%;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+
+        #container {
             width: 100%;
-            overflow: hidden; /* Prevent scrolling */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Center the movement-div both horizontally and vertically */
         #movement-div {
-            display: flex; /* Use flexbox for centering */
-            justify-content: center; /* Center horizontally */
-            align-items: center; /* Center vertically */
-            height: 100vh; /* Full viewport height */
-            width: 100vw; /* Full viewport width */
-            text-align: center; /* Center text within the div */
-            background-color: #f0f0f0; /* Optional: Add background color for visibility */
+            width: 100%;
+            height: 66.67%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
         }
 
-        /* Style the H1 and P elements */
         #movement-div h1 {
-            font-size: 8rem; /* Adjust font size for mobile (responsive) */
-            color: #333; /* Optional: Text color */
-            margin: 0; /* Remove default margin */
+            font-size: 8rem;
+            color: #a3a3a3;
+            margin: 0;
+            text-align: center;
         }
 
         #movement-div p {
-            margin: 0; /* Remove default margin for the <p> tag */
+            margin: 0;
         }
 
-        /* Responsive font size for smaller screens */
         @media (max-width: 768px) {
             #movement-div h1 {
-                font-size: 2rem; /* Smaller font size for mobile */
+                font-size: 3rem;
+            }
+        }
+
+        #button-container {
+            width: 100%;
+            height: 33.33%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #left-click-btn {
+            width: 40%;
+            height: 100%;
+            background-color: #a3a3a3;
+            color: #f0f0f0;
+            font-size: 8rem;
+            border: 2px solid #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        #right-click-btn {
+            width: 40%;
+            height: 100%;
+            background-color: #a3a3a3;
+            color: #f0f0f0;
+            font-size: 8rem;
+            border: 2px solid #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        #scroll-container {
+            width: 20%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #scroll-up-btn {
+            width: 100%;
+            height: 50%;
+            background-color: #666;
+            color: #f0f0f0;
+            font-size: 2rem;
+            border: 2px solid #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            line-height: normal;
+        }
+
+        #scroll-down-btn {
+            width: 100%;
+            height: 50%;
+            background-color: #666;
+            color: #f0f0f0;
+            font-size: 2rem;
+            border: 2px solid #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            line-height: normal;
+        }
+
+        #left-click-btn:hover {
+            background-color: #a3a3a3;
+        }
+
+        #right-click-btn:hover {
+            background-color: #a3a3a3;
+        }
+
+        #scroll-up-btn:hover {
+            background-color: #555;
+        }
+
+        #scroll-down-btn:hover {
+            background-color: #555;
+        }
+
+        @media (max-width: 768px) {
+            #left-click-btn {
+                font-size: 3rem;
+            }
+
+            #right-click-btn {
+                font-size: 3rem;
+            }
+
+            #scroll-up-btn {
+                font-size: 2rem;
+            }
+
+            #scroll-down-btn {
+                font-size: 2rem;
             }
         }
     </style>
 </head>
-<body style="background-color: burlywood;">
-<div id="movement-div"><H1>Remote<p></p>TouchPad</H1></div>
-<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-<script>
-const movementDiv = document.getElementById('movement-div');
-//const socket = io('http://10.0.241.122:5000');
-const socketUrl = `http://${window.location.hostname}:5000`;
-console.log(socketUrl);
-const socket = io(socketUrl);
-let touchStartTime = null;
-const tapThreshold = 300; // Milliseconds for tap detection
+<body>
+    <div id="container">
+        <div id="movement-div">
+            <h1>Remote<p>TouchPad</p></h1>
+        </div>
+        <div id="button-container">
+            <button id="left-click-btn">L</button>
+            <div id="scroll-container">
+                <button id="scroll-up-btn">▲</button>
+                <button id="scroll-down-btn">▼</button>
+            </div>
+            <button id="right-click-btn">R</button>
+        </div>
+    </div>
 
-movementDiv.addEventListener('touchstart', (event) => {
-    event.preventDefault();
-    touchStartTime = Date.now();
-    const touch = event.touches[0];
-    const x = touch.pageX;
-    const y = touch.pageY;
-    const W_div = movementDiv.clientWidth;
-    const H_div = movementDiv.clientHeight;
-    socket.emit('message', { type: 'touchstart', x: x, y: y, W_div: W_div, H_div: H_div });
-});
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script>
+        const movementDiv = document.getElementById('movement-div');
+        const leftClickBtn = document.getElementById('left-click-btn');
+        const rightClickBtn = document.getElementById('right-click-btn');
+        const scrollUpBtn = document.getElementById('scroll-up-btn');
+        const scrollDownBtn = document.getElementById('scroll-down-btn');
+        const socketUrl = `http://${window.location.hostname}:5000`;
+        const socket = io(socketUrl);
+        let touchStartTime = null;
+        const tapThreshold = 300;
 
-movementDiv.addEventListener('touchmove', (event) => {
-    event.preventDefault();
-    const touch = event.touches[0];
-    const x = touch.pageX;
-    const y = touch.pageY;
-    socket.emit('message', { type: 'touchmove', x: x, y: y });
-});
+        movementDiv.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            touchStartTime = Date.now();
+            const touch = event.touches[0];
+            const x = touch.pageX;
+            const y = touch.pageY;
+            const W_div = movementDiv.clientWidth;
+            const H_div = movementDiv.clientHeight;
+            socket.emit('message', { type: 'touchstart', x: x, y: y, W_div: W_div, H_div: H_div });
+        });
 
-movementDiv.addEventListener('touchend', (event) => {
-    event.preventDefault();
-    const touchDuration = Date.now() - touchStartTime;
-    if (touchDuration < tapThreshold && event.changedTouches.length > 0) {
-        // Quick tap detected
-        const fingers = event.changedTouches.length;
-        socket.emit('message', { type: 'click', fingers: fingers });
-    }
-    socket.emit('message', { type: 'touchend' });
-});
-</script>
-<style>
-#movement-div {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-}
-</style>
+        const throttledMove = _.throttle((x, y) => {
+            socket.emit('message', { type: 'touchmove', x, y });
+        }, 10);
+
+        movementDiv.addEventListener('touchmove', (event) => {
+            event.preventDefault();
+            const touch = event.touches[0];
+            throttledMove(touch.pageX, touch.pageY);
+        });
+
+        movementDiv.addEventListener('touchend', (event) => {
+            event.preventDefault();
+            const touchDuration = Date.now() - touchStartTime;
+            socket.emit('message', { type: 'touchend' });
+        });
+
+        leftClickBtn.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            socket.emit('message', { type: 'click' });
+        });
+
+        rightClickBtn.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            socket.emit('message', { type: 'rightclick' });
+        });
+
+        scrollUpBtn.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            socket.emit('message', { type: 'scrollup' });
+        });
+
+        scrollDownBtn.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            socket.emit('message', { type: 'scrolldown' });
+        });
+
+        leftClickBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            socket.emit('message', { type: 'click' });
+        });
+
+        rightClickBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            socket.emit('message', { type: 'rightclick' });
+        });
+
+        scrollUpBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            socket.emit('message', { type: 'scrollup' });
+        });
+
+        scrollDownBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            socket.emit('message', { type: 'scrolldown' });
+        });
+
+        // Dynamically adjust container height to viewport
+        window.addEventListener('resize', () => {
+            document.getElementById('container').style.height = window.innerHeight + 'px';
+        });
+        document.getElementById('container').style.height = window.innerHeight + 'px';
+    </script>
 </body>
 </html>
